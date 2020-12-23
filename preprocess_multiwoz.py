@@ -17,8 +17,8 @@ import numpy as np
 from utils.multiwoz import dbPointer
 from utils.multiwoz import delexicalize
 
-from utils.multiwoz.nlp import normalize, normalize_lexical, normalize_beliefstate, normalize_mine
-import ipdb
+from utils.multiwoz.nlp import normalize, normalize_lexical, normalize_beliefstate
+# import ipdb
 
 np.set_printoptions(precision=3)
 
@@ -84,31 +84,6 @@ def delexicaliseReferenceNumber(sent, turn):
 
                     # try reference with ref#
                     key = normalize("ref#" + turn['metadata'][domain]['book']['booked'][0][slot])
-                    sent = (' ' + sent + ' ').replace(' ' + key + ' ', ' ' + val + ' ')
-    return sent
-
-
-def delexicaliseReferenceNumber_mine(sent, turn):
-    """Based on the belief state, we can find reference number that
-    during data gathering was created randomly."""
-    domains = ['restaurant', 'hotel', 'attraction', 'train', 'taxi', 'hospital']  # , 'police']
-    if turn['metadata']:
-        for domain in domains:
-            if turn['metadata'][domain]['book']['booked']:
-                for slot in turn['metadata'][domain]['book']['booked'][0]:
-                    if slot == 'reference':
-                        val = '[' + domain + '_' + slot + ']'
-                    else:
-                        val = '[' + domain + '_' + slot + ']'
-                    key = normalize_mine(turn['metadata'][domain]['book']['booked'][0][slot])
-                    sent = (' ' + sent + ' ').replace(' ' + key + ' ', ' ' + val + ' ')
-
-                    # try reference with hashtag
-                    key = normalize_mine("#" + turn['metadata'][domain]['book']['booked'][0][slot])
-                    sent = (' ' + sent + ' ').replace(' ' + key + ' ', ' ' + val + ' ')
-
-                    # try reference with ref#
-                    key = normalize_mine("ref#" + turn['metadata'][domain]['book']['booked'][0][slot])
                     sent = (' ' + sent + ' ').replace(' ' + key + ' ', ' ' + val + ' ')
     return sent
 
@@ -232,47 +207,6 @@ def get_belief_state(bstate):
     return raw_bstate
 
 
-def analyze_dialogue(dialogue, maxlen):
-    """Cleaning procedure for all kinds of errors in text and annotation."""
-    d = dialogue
-    # do all the necessary postprocessing
-    if len(d['log']) % 2 != 0:
-        # print path
-        print('odd # of turns')
-        return None  # odd number of turns, wrong dialogue
-    d_pp = {}
-    d_pp['goal'] = d['goal']  # for now we just copy the goal
-    usr_turns = []
-    sys_turns = []
-    for i in range(len(d['log'])):
-        if len(d['log'][i]['text'].split()) > maxlen:
-            print('too long')
-            return None  # too long sentence, wrong dialogue
-        if i % 2 == 0:  # usr turn
-            if 'db_pointer' not in d['log'][i]:
-                print('no db')
-                return None  # no db_pointer, probably 2 usr turns in a row, wrong dialogue
-            text = d['log'][i]['text']
-            if not is_ascii(text):
-                print('not ascii')
-                return None
-            # d['log'][i]['tkn_text'] = self.tokenize_sentence(text, usr=True)
-            usr_turns.append(d['log'][i])
-        else:  # sys turn
-            text = d['log'][i]['text']
-            if not is_ascii(text):
-                print('not ascii')
-                return None
-            # d['log'][i]['tkn_text'] = self.tokenize_sentence(text, usr=False)
-            belief_summary = get_summary_bstate(d['log'][i]['metadata'])
-            d['log'][i]['belief_summary'] = belief_summary
-            sys_turns.append(d['log'][i])
-    d_pp['usr_log'] = usr_turns
-    d_pp['sys_log'] = sys_turns
-
-    return d_pp
-
-
 def analyze_dialogue_raw_beliefstate(dialogue, maxlen):
     """Cleaning procedure for all kinds of errors in text and annotation."""
     d = dialogue
@@ -315,67 +249,6 @@ def analyze_dialogue_raw_beliefstate(dialogue, maxlen):
     d_pp['sys_log'] = sys_turns
 
     return d_pp
-
-
-def analyze_dialogue_raw_beliefstate_v2(dialogue, maxlen):
-    """Cleaning procedure for all kinds of errors in text and annotation."""
-    d = dialogue
-    # do all the necessary postprocessing
-    if len(d['log']) % 2 != 0:
-        # print path
-        print('odd # of turns')
-        return None  # odd number of turns, wrong dialogue
-    d_pp = {}
-    d_pp['goal'] = d['goal']  # for now we just copy the goal
-    usr_turns = []
-    sys_turns = []
-    for i in range(len(d['log'])):
-        if len(d['log'][i]['text'].split()) > maxlen:
-            print('too long')
-            return None  # too long sentence, wrong dialogue
-        if i % 2 == 0:  # usr turn
-            if 'db_pointer' not in d['log'][i]:
-                print('no db')
-                return None  # no db_pointer, probably 2 usr turns in a row, wrong dialogue
-            text = d['log'][i]['text']
-            if not is_ascii(text):
-                print('not ascii')
-                return None
-            # d['log'][i]['tkn_text'] = self.tokenize_sentence(text, usr=True)
-            usr_turns.append(d['log'][i])
-        else:  # sys turn
-            text = d['log'][i]['text']
-            if not is_ascii(text):
-                print('not ascii')
-                return None
-            # d['log'][i]['tkn_text'] = self.tokenize_sentence(text, usr=False)
-            belief_summary = get_summary_bstate(d['log'][i]['metadata'])
-            d['log'][i]['belief_summary'] = belief_summary
-            # get raw belief state
-            belief_state = get_belief_state(d['log'][i]['metadata'])
-            d['log'][i]['belief_state'] = belief_state
-            sys_turns.append(d['log'][i])
-    d_pp['usr_log'] = usr_turns
-    d_pp['sys_log'] = sys_turns
-
-    return d_pp
-
-
-def get_dial(dialogue):
-    """Extract a dialogue from the file"""
-    dial = []
-    # d_orig = analyze_dialogue(dialogue, MAX_LENGTH)  # max turn len is 50 words
-    d_orig = analyze_dialogue_raw_beliefstate(dialogue, MAX_LENGTH)  # max turn len is 50 words
-    if d_orig is None:
-        return None
-    usr = [t['text'] for t in d_orig['usr_log']]
-    db = [t['db_pointer'] for t in d_orig['usr_log']]
-    bs = [t['belief_summary'] for t in d_orig['sys_log']]
-    sys = [t['text'] for t in d_orig['sys_log']]
-    for u, d, s, b in zip(usr, db, sys, bs):
-        dial.append((u, s, d, b))
-
-    return dial
 
 
 def get_dial_raw_bstate(dialogue):
@@ -462,15 +335,14 @@ def createDelexData():
 
     for dialogue_name in tqdm(data):
         dialogue = data[dialogue_name]
-        # print dialogue_name
 
         idx_acts = 1
         for idx, turn in enumerate(dialogue['log']):
             # normalization, split and delexicalization of the sentence
             sent = normalize(turn['text'])
 
-            words = sent.split()
-            sent = delexicalize.delexicalise(' '.join(words), dic)
+            # words = sent.split()
+            sent = delexicalize.delexicalise(sent, dic)#' '.join(words), dic)
 
             # parsing reference number GIVEN belief state
             sent = delexicaliseReferenceNumber(sent, turn)
@@ -519,72 +391,6 @@ def loadDataMultiWoz():
 
         moveFiles(src_path=extract_path, dst_path=download_path)
         return
-
-
-def createDelexData_mine():
-    """Main function of the script - loads delexical dictionary,
-    goes through each dialogue and does:
-    1) data normalization
-    2) delexicalization
-    3) addition of database pointer
-    4) saves the delexicalized data
-    """
-    # download the data
-    loadDataMultiWoz()
-
-    # create dictionary of delexicalied values that then we will search against, order matters here!
-    dic = delexicalize.prepareSlotValuesIndependent_mine()
-    delex_data = {}
-
-    fin1 = open(os.path.join(DATA_DIR, 'multi-woz/data.json'))
-    data = json.load(fin1)
-
-    fin2 = open(os.path.join(DATA_DIR, 'multi-woz/dialogue_acts.json'))
-    data2 = json.load(fin2)
-
-    for dialogue_name in tqdm(data):
-        dialogue = data[dialogue_name]
-        # print dialogue_name
-
-        idx_acts = 1
-        for idx, turn in enumerate(dialogue['log']):
-            # normalization, split and delexicalization of the sentence
-            sent = normalize_mine(turn['text'])
-
-            # only delexicalize system response
-            if idx % 2 == 1:
-                words = sent.split()
-                sent = delexicalize.delexicalise(' '.join(words), dic)
-
-            # parsing reference number GIVEN belief state
-            sent = delexicaliseReferenceNumber_mine(sent, turn)
-
-            # changes to numbers only here
-            digitpat = re.compile('\d+')
-            # sent = re.sub(digitpat, '[value_count]', sent)
-
-            # delexicalized sentence added to the dialogue
-            dialogue['log'][idx]['text'] = sent
-
-            if idx % 2 == 1:  # if it's a system turn
-                # add database pointer
-                pointer_vector = addDBPointer(turn)
-                # add booking pointer
-                pointer_vector = addBookingPointer(dialogue, turn, pointer_vector)
-
-                # print pointer_vector
-                dialogue['log'][idx - 1]['db_pointer'] = pointer_vector.tolist()
-
-            # FIXING delexicalization:
-            dialogue = fixDelex(dialogue_name, dialogue, data2, idx, idx_acts)
-            idx_acts += 1
-
-        delex_data[dialogue_name] = dialogue
-
-    with open(os.path.join(DATA_DIR, 'multi-woz/delex_mine.json'), 'w') as outfile:
-        json.dump(delex_data, outfile)
-
-    return delex_data
 
 
 def createLexicalData():

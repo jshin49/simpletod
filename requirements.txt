@@ -1,6 +1,14 @@
-transformers
+transformers==2.5.1
 spicy
 boto3
-ipdb
 tqdm
-json
+torch==1.2
+tensorboard
+sacrebleu
+gsutil
+ipdb
+spacy
+simplejson
+nltk
+tensorboardX
+colorama

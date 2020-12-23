@@ -3,7 +3,6 @@ import json
 import random
 import torch
 import numpy as np
-import ipdb
 import warnings
 
 import spacy
@@ -71,13 +70,13 @@ class MultiWozDataset(object):
         output_index2word_filepath = os.path.join(self.data_dir, output_index2word_name)
 
 
-        self.dialogues = json.load(open(file_path, 'rt'))
+        self.dialogues = json.load(open(file_path, 'r'))
         self.actions = json.load(open('resources/multi-woz/dialogue_acts.json', 'r'))
 
-        self.input_word2index = json.load(open(input_word2index_filepath, 'rt'))
-        self.output_word2index = json.load(open(output_word2index_filepath, 'rt'))
-        self.input_index2word = json.load(open(input_index2word_filepath, 'rt'))
-        self.output_index2word = json.load(open(output_index2word_filepath, 'rt'))
+        self.input_word2index = json.load(open(input_word2index_filepath, 'r'))
+        self.output_word2index = json.load(open(output_word2index_filepath, 'r'))
+        self.input_index2word = json.load(open(input_index2word_filepath, 'r'))
+        self.output_index2word = json.load(open(output_index2word_filepath, 'r'))
 
         # special tokens
         self.sos_token = SOS_token

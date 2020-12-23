@@ -8,7 +8,7 @@ from utils.multiwoz import dbPointer
 from utils.simpletod import *
 import tqdm
 import json
-import ipdb
+# import ipdb
 import sys
 import os
 
@@ -44,7 +44,6 @@ multiwoz_data = json.load(open('resources/multi-woz/lex.json','r'))
 # checkpoint = opt.checkpoint
 # model_checkpoint = '../dialog-transformer/output/{}/{}/'.format(exp_name, checkpoint)
 model_checkpoint = opt.checkpoint
-exp_name = os.path.split(model_checkpoint)[0].split('/')[-2]
 
 multiwoz_db = MultiWozDB()
 
@@ -63,6 +62,8 @@ for d in data:
 
 for d in data_delex:
     delex_dict[d['name']] = d
+
+print(f"Loading checkpoint {model_checkpoint}")
 
 if 'openai-gpt' in model_checkpoint:
     tokenizer = OpenAIGPTTokenizer.from_pretrained(model_checkpoint)
@@ -296,8 +297,8 @@ for i, dial_name in enumerate(lex_dict):
                                     continue
                                 new_actions.append(a.strip())
                             len_actions = len(new_actions)
-                            if len(list(set(new_actions))) > len(new_actions) or (
-                                    len_actions > 10 and not truncate_action):
+                            if len(list(set(new_actions))) > len(new_actions): #\
+                                # or (len_actions > 10 and not truncate_action):
                                 actions = '<|action|> {} <|endofaction|>'.format(' , '.join(list(set(new_actions))))
                                 indexed_tokens = tokenizer.encode(
                                     '{} {}'.format(predicted_text.split('<|action|>')[0], actions))
@@ -370,23 +371,25 @@ for i, dial_name in enumerate(lex_dict):
     }
 
 
-save_name = '{}_{}'.format(exp_name, EVAL_SPLIT)
+exp_name = model_checkpoint.split('/')[1]
+exp_dir = model_checkpoint.split('/')[0]
+save_name = "{}/{}/{}".format(exp_dir, exp_name, EVAL_SPLIT)
 
 if USE_ORACLE_BELIEF:
-    save_name += '_oracleBelief'
+    save_name += "_oracleBelief"
 
 if USE_DB_SEARCH:
-    save_name += '_oracleDB'
+    save_name += "_oracleDB"
 
 if USE_ORACLE_ACTION:
-    save_name += '_oracleAction'
+    save_name += "_oracleAction"
 
 if HISTORY_LEN:
-    save_name += '_context[history={}]'.format(HISTORY_LEN)
+    save_name += "_context[history={}]".format(HISTORY_LEN)
 else:
-    save_name += '_context[history=full_history]'
+    save_name += "_context[history=full_history]"
 
-save_name += '_nocarry'
+save_name += "_nocarry"
 
-with open('{}.json'.format(save_name), 'wt') as f:
+with open("{}.json".format(save_name), "wt") as f:
     json.dump(generated_dict, f)

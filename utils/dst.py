@@ -78,20 +78,33 @@ def ignore_none(pred_belief, target_belief):
 
     clean_target_belief = []
     clean_pred_belief = []
-    for bs in target_belief:
-        if 'not mentioned' in bs:
+    for target in target_belief:
+        if 'not mentioned' in target:
             continue
-        clean_target_belief.append(bs)
+        clean_target_belief.append(target)
 
-    for bs in pred_belief:
-        if 'not mentioned' in bs:
+    for pred in pred_belief:
+        if 'not mentioned' in pred:
             continue
-        clean_pred_belief.append(bs)
+        clean_pred_belief.append(pred)
 
-    target_belief = clean_target_belief
-    pred_belief = clean_pred_belief
+    return clean_pred_belief, clean_target_belief
 
-    return pred_belief, target_belief
+
+def ignore_dontcare(pred_belief, target_belief):
+    clean_target_belief = []
+    clean_pred_belief = []
+    for target in target_belief:
+        if 'dontcare' in target:
+            continue
+        clean_target_belief.append(target)
+
+    for pred in pred_belief:
+        if 'dontcare' in pred:
+            continue
+        clean_pred_belief.append(pred)
+
+    return clean_pred_belief, clean_target_belief
 
 
 def fix_mismatch_jason(slot, value):

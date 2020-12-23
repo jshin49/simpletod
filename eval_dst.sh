@@ -13,7 +13,6 @@ CUDA_VISIBLE_DEVICES=$1 python main.py \
     --output_dir=$OUTPUT \
     --model_type=$MODEL \
     --model_name_or_path=$MODEL_NAME \
-    --do_train \
     --train_data_file=$TRAIN_FILE \
     --do_eval \
     --eval_data_file=$TEST_FILE \
@@ -21,5 +20,6 @@ CUDA_VISIBLE_DEVICES=$1 python main.py \
     --save_steps 10000 \
     --logging_steps 10000 \
     --per_gpu_train_batch_size 1 \
+    --per_gpu_eval_batch_size 8 \
     --num_train_epochs 10 \
     --gradient_accumulation_steps 16

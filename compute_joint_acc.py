@@ -1,10 +1,8 @@
 import json
-from sklearn.metrics import f1_score, accuracy_score
-import ipdb
-import sys
+# from sklearn.metrics import f1_score, accuracy_score
 import numpy as np
 from utils.Constants import SLOT_VALS
-from utils.dst import ignore_none, default_cleaning, IGNORE_TURNS_TYPE2
+from utils.dst import ignore_none, ignore_dontcare, default_cleaning, IGNORE_TURNS_TYPE2
 import argparse
 
 
@@ -16,6 +14,7 @@ parser.add_argument('--default_cleaning', action='store_true',
 parser.add_argument('--type2_cleaning', action='store_true',
                     help='use type 2 cleaning, refer to [https://arxiv.org/abs/2005.00796]')
 
+args = parser.parse_args()
 data = json.load(open(args.eval_file, 'r'))
 
 num_turns = 0
@@ -44,15 +43,16 @@ for dial in data:
         turn_pred = new_turn_pred
 
         turn_pred, turn_target = ignore_none(turn_pred, turn_target)
-
+        turn_pred, turn_target = ignore_dontcare(turn_pred, turn_target)
+        
         # MultiWOZ default cleaning
         if args.default_cleaning:
             turn_pred, turn_target = default_cleaning(turn_pred, turn_target)
 
-        join_flag = False
+        # join_flag = False
         if set(turn_target) == set(turn_pred):
             joint_acc += 1
-            join_flag = True
+            # join_flag = True
         
         elif args.type2_cleaning: # check for possible Type 2 noisy annotations
             flag = True
@@ -63,6 +63,7 @@ for dial in data:
             if flag:
                 for bs in turn_pred:
                     if bs not in dialogue_target_final:
+                    # if bs not in dialogue_target:
                         flag = False
                         break
 

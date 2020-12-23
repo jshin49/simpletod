@@ -4,7 +4,7 @@
 export MODEL=$2
 export MODEL_NAME=$3
 export BATCH=$4
-export OUTPUT=output/${MODEL_NAME}
+export OUTPUT=output/e2e_${MODEL_NAME}
 
 export TRAIN_FILE=./resources/gpt2/train.history_belief_action_sys_delex
 export TEST_FILE=./resources/gpt2/val.history_belief_action_sys_delex
@@ -20,6 +20,7 @@ CUDA_VISIBLE_DEVICES=$1 python main.py \
     --eval_data_file=$TEST_FILE \
     --evaluate_during_training \
     --save_steps 10000 \
-    --logging_steps 1000 \
+    --logging_steps 10000 \
     --per_gpu_train_batch_size $BATCH \
-    --num_train_epochs 100
+    --num_train_epochs 30 \
+    --gradient_accumulation_steps 16
