@@ -1,3 +1,13 @@
+# Working version of SimpleTOD
+
+Steps to reproduce results:
+
+1. Install requirements: `pip install -r requirements.txt`
+2. Preprocess data: `bash create_dataset.sh`
+3. Train end2end model: `bash train_end2end.sh $GPU gpt2 gpt2 $BATCH_SIZE`
+4. Run Generation on eval set: `CUDA_VISIBLE_DEVICES=$GPU python generate_dialogue.py --checkpoint output/e2e_gpt2/checkpoint-$NUMBER --decoding greedy`
+5. Compute DST Accuracy: `python compute_joint_acc.py output/e2e_gpt2_test_***.json`
+
 
 
 
