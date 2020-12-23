@@ -7,8 +7,9 @@ Steps to reproduce results:
 3. Train end2end model: `bash train_end2end.sh $GPU gpt2 gpt2 $BATCH_SIZE`
 4. Run Generation on eval set: `CUDA_VISIBLE_DEVICES=$GPU python generate_dialogue.py --checkpoint output/e2e_gpt2/checkpoint-$NUMBER --decoding greedy`
 5. Compute DST Accuracy: `python compute_joint_acc.py output/e2e_gpt2_test_***.json`
+6. Run Interactive demo: `CUDA_VISIBLE_DEVICES=0 python demo.py output/e2e_gpt2/checkpoint-$NUMBER/ greedy`
 
-
+When running step 5, I fixed that it ignores `dontcare` slot-values as well as `none` to get ~56 joint accuracy. Otherwise, I get around 50 only.
 
 
 # SimpleTOD: A Simple Language Model for Task-Oriented Dialogue
