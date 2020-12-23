@@ -11,6 +11,8 @@ Steps to reproduce results:
 
 When running step 5, I fixed that it ignores `dontcare` slot-values as well as `none` to get ~56 joint accuracy. Otherwise, I get around 50 only.
 
+For readability and usability of code, I removed all non-used functions and DDP functionality in `main.py`.
+
 
 # SimpleTOD: A Simple Language Model for Task-Oriented Dialogue
 Authors: [Ehsan Hosseini-Asl](https://scholar.google.com/citations?user=I9w3ON4AAAAJ&hl=en), [Bryan McCann](https://bmccann.github.io/), [Chien-Sheng Wu](https://jasonwu0731.github.io/), [Semih Yavuz](https://scholar.google.co.uk/citations?user=krh3p8AAAAAJ&hl=en), and [Richard Socher](https://www.socher.org/)
